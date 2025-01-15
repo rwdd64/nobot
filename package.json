@@ -8,5 +8,8 @@
   },
   "author": "rwdd64",
   "license": "MIT",
-  "description": "A utilities Discord bot"
+  "description": "A utilities Discord bot",
+  "dependencies": {
+    "discord.js": "^14.17.3"
+  }
 }
