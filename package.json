@@ -1,0 +1,12 @@
+{
+  "name": "nobot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch ."
+  },
+  "author": "rwdd64",
+  "license": "MIT",
+  "description": "A utilities Discord bot"
+}
