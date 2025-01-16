@@ -1,7 +1,7 @@
 //TODO: Make prefix server specific
 let PREFIX = ";";
 
-import { REST, Routes, ApplicationCommandOptionType, ChatInputCommandInteraction, Message } from 'discord.js';
+import { REST, Routes, ApplicationCommandOptionType, ChatInputCommandInteraction, Message, Client, Events, GatewayIntentBits } from 'discord.js';
 
 const commands = [
     {
@@ -118,8 +118,6 @@ try {
 } catch (error) {
     console.error(error);
 }
-
-import { Client, Events, GatewayIntentBits } from 'discord.js';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
