@@ -1,7 +1,29 @@
-//TODO: Make prefix server specific
-let PREFIX = ";";
-
 import { REST, Routes, ApplicationCommandOptionType, ChatInputCommandInteraction, Message, Client, Events, GatewayIntentBits } from 'discord.js';
+import { MongoClient, ServerApiVersion } from "mongodb";
+
+const DEFAULT_PREFIX = ";";
+const DB_NAME = "main";
+
+const uri = process.env.MONGODB_URI;
+const options = {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+};
+
+const db_client = new MongoClient(uri, options);
+
+let db;
+let guilds_collection;
+try {
+    await db_client.connect();
+    db = await db_client.db(DB_NAME);
+    guilds_collection = await db.collection("guilds");
+} catch (err) {
+    console.dir(err);
+}
 
 const commands = [
     {
@@ -50,7 +72,15 @@ const func_table = {
     help: async function (env, args) {
         let response = "";
 
-        response += `**PREFIX**: \`${PREFIX}\`\n`;
+        let prefix;
+        let doc = await guilds_collection.findOne({guildId: env.guildId});
+        if (doc) {
+            prefix = doc.prefix;
+        } else {
+            prefix = DEFAULT_PREFIX;
+        }
+
+        response += `**PREFIX**: \`${prefix}\` (Default: \`${DEFAULT_PREFIX}\`)\n`;
         response += "**COMMANDS**:\n";
         for (const cmd of commands) {
             response += `\t${cmd.name} `;
@@ -58,7 +88,7 @@ const func_table = {
                 for (const option of cmd.options) {
                     response += option.required ? "<" : "[";
                     response += `${option.name} - ${option.description}`;
-                    response += option.required ? ">" : "]";
+                    response += option.required ? "> " : "] ";
                 }
             }
             response += `: ${cmd.description}\n`;
@@ -80,13 +110,21 @@ const func_table = {
         await env.reply(content);
     },
     chprefix: async function (env, args) {
+        let prefix;
         if (env instanceof ChatInputCommandInteraction) {
-            PREFIX = env.options.getString("new_prefix");
+            prefix = env.options.getString("new_prefix");
         } else if (env instanceof Message) {
-            PREFIX = args.slice(1).join(" ");
+            prefix = args.slice(1).join(" ");
         }
 
-        await env.reply(`Successfuly changed prefix to ${PREFIX}`);
+        let doc = await guilds_collection.findOne({guildId: env.guildId});
+        if (doc) {
+            await guilds_collection.updateOne(doc, {$set: {prefix}});
+        } else {
+            await guilds_collection.insertOne({guildId: env.guildId, prefix});
+        }
+
+        await env.reply(`Successfuly changed prefix to ${prefix}`);
     },
     uptime: async function (env, args) {
         const SEC_PER_DAY = 86400;
@@ -138,12 +176,27 @@ client.on(Events.MessageCreate, async msg => {
         func_table["help"](msg, null);
     }
 
-    if (!msg.content.startsWith(PREFIX)) return;
+    let prefix;
+    let doc = await guilds_collection.findOne({guildId: msg.guildId});
+    if (doc) {
+        prefix = doc.prefix;
+    } else {
+        prefix = DEFAULT_PREFIX;
+    }
 
-    const args = msg.content.slice(PREFIX.length).split(" ");
+    if (!msg.content.startsWith(prefix)) return;
+
+    const args = msg.content.slice(prefix.length).split(" ");
 
     const f = func_table[args[0]];
     if (f) f(msg, args);
 });
 
-client.login(process.env.TOKEN);
+await client.login(process.env.TOKEN);
+
+process.on('SIGINT', function() {
+    console.log("Caught interrupt signal");
+
+    db_client.close();
+    process.exit();
+});
