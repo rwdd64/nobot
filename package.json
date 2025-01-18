@@ -4,10 +4,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node --env-file .env ./test.js",
-    "start": "node --env-file .env ./index.js",
-    "watch": "node --watch --env-file .env ./index.js",
-    "dev": "node --env-file .env.dev ./index.js"
+    "test": "node --env-file=.env ./test.js",
+    "start": "node --env-file=.env ./index.js",
+    "watch": "node --watch --env-file=.env ./index.js",
+    "dev": "node --env-file=.env.dev ./index.js",
+    "dev:watch": "node --watch --env-file=.env.dev ./index.js"
   },
   "author": "rwdd64",
   "license": "MIT",
