@@ -65,6 +65,10 @@ const commands = [
     {
         name: "uptime",
         description: "Check how long the bot\'s online",
+    },
+    {
+        name: "up",
+        description: "Alias for \"uptime\"",
     }
 ];
 
@@ -143,6 +147,7 @@ const func_table = {
 
         await env.reply(response);
     },
+    up: async function (env, args) { return func_table.uptime(env, args); },
 };
 
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
