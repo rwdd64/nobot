@@ -1,4 +1,4 @@
-import { REST, Routes, ApplicationCommandOptionType, ChatInputCommandInteraction, Message, Client, Events, GatewayIntentBits } from 'discord.js';
+import { REST, Routes, ApplicationCommandOptionType, ChatInputCommandInteraction, Message, Client, Events, GatewayIntentBits } from "discord.js";
 import { MongoClient, ServerApiVersion } from "mongodb";
 
 const DEFAULT_PREFIX = ";";
@@ -27,20 +27,20 @@ try {
 
 const commands = [
     {
-        name: 'help',
-        description: 'Get information about the commands',
+        name: "help",
+        description: "Get information about the commands",
     },
     {
-        name: 'h',
-        description: 'Alias for \"help\"',
+        name: "h",
+        description: "Alias for \"help\"",
     },
     {
-        name: 'ping',
-        description: 'Replies with Pong!',
+        name: "ping",
+        description: "Replies with Pong!",
     },
     {
-        name: 'echo',
-        description: 'Echoes the user',
+        name: "echo",
+        description: "Echoes the user",
         options: [
             {
                 name: "text",
@@ -51,8 +51,8 @@ const commands = [
         ],
     },
     {
-        name: 'chprefix',
-        description: 'Change the bot\'s prefix',
+        name: "chprefix",
+        description: "Change the bot\'s prefix",
         options: [
             {
                 name: "new_prefix",
@@ -63,8 +63,8 @@ const commands = [
         ],
     },
     {
-        name: 'uptime',
-        description: 'Check how long the bot\'s online',
+        name: "uptime",
+        description: "Check how long the bot\'s online",
     }
 ];
 
@@ -145,14 +145,14 @@ const func_table = {
     },
 };
 
-const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 try {
-    console.log('Started refreshing application (/) commands.');
+    console.log("Started refreshing application (/) commands.");
 
     await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
 
-    console.log('Successfully reloaded application (/) commands.');
+    console.log("Successfully reloaded application (/) commands.");
 } catch (error) {
     console.error(error);
 }
@@ -194,7 +194,7 @@ client.on(Events.MessageCreate, async msg => {
 
 await client.login(process.env.TOKEN);
 
-process.on('SIGINT', function() {
+process.on("SIGINT", function() {
     console.log("Caught interrupt signal");
 
     db_client.close();
