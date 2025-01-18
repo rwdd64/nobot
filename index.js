@@ -1,4 +1,4 @@
-import { REST, Routes, ApplicationCommandOptionType, ChatInputCommandInteraction, Message, Client, Events, GatewayIntentBits } from "discord.js";
+import { REST, Routes, ApplicationCommandOptionType, ChatInputCommandInteraction, Message, Client, Events, GatewayIntentBits, Embed, resolveColor } from "discord.js";
 import { MongoClient, ServerApiVersion } from "mongodb";
 
 const DEFAULT_PREFIX = ";";
@@ -69,7 +69,43 @@ const commands = [
     {
         name: "up",
         description: "Alias for \"uptime\"",
-    }
+    },
+    {
+        name: "mkembed",
+        description: "Create an embed message",
+        options: [
+            {
+                name: "title",
+                description: "Title of the embed",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            },
+            {
+                name: "desc",
+                description: "Description of the embed",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            },
+            {
+                name: "color",
+                description: "Color of the side",
+                type: ApplicationCommandOptionType.String,
+                required: false,
+            },
+            {
+                name: "footer",
+                description: "Footer of the embed",
+                type: ApplicationCommandOptionType.String,
+                required: false,
+            },
+            {
+                name: "url",
+                description: "Url pointed by the title",
+                type: ApplicationCommandOptionType.String,
+                required: false,
+            },
+        ],
+    },
 ];
 
 const func_table = {
@@ -148,6 +184,83 @@ const func_table = {
         await env.reply(response);
     },
     up: async function (env, args) { return func_table.uptime(env, args); },
+    mkembed: async function (env, args) {
+        if (env instanceof Message) {
+            return env.reply("[ERROR]: Command not compatible with prefix");
+        }
+
+        const opt = env.options;
+
+        let color = resolveColor("Random");
+        if (opt.getString("color", false)) {
+            let try_color;
+            try {
+                try_color = resolveColor(opt.getString("color"));
+                color = try_color;
+            } catch (_err) {
+                return env.reply(`[ERROR]:Unable to Resolve color ${opt.getString("color")}`);
+            }
+        }
+
+        let url = null;
+        if (opt.getString("url", false)) {
+            let try_url = opt.getString("url");
+            if (try_url.startsWith("http://") ||
+                try_url.startsWith("https://")) {
+                url = try_url;
+            } else {
+                return env.reply(`[ERROR]: Invalid URL provided. Must start with 'http://' or 'https://'`);
+            }
+        }
+
+        let embed = new Embed({
+            color: color,
+            title: opt.getString("title"),
+            url: url,
+            description: opt.getString("desc"),
+            author: {
+                name: env.user.username,
+                url: null,
+                icon_url: env.user.displayAvatarURL(),
+                proxy_icon_url: null,
+            },
+            footer: {
+                text: opt.getString("footer", false) ?
+                    opt.getString("footer") : `Made with ${client.user.username}`,
+                icon_url: client.user.displayAvatarURL(),
+                proxy_icon_url: null,
+            },
+            thumbnail: {
+                width: null,
+                height: null,
+                url: null,
+                proxy_url: null,
+            },
+            video: {
+                width: null,
+                height: null,
+                url: null,
+                proxy_url: null,
+            },
+            image: {
+                width: null,
+                height: null,
+                url: null,
+                proxy_url: null,
+            },
+            /*
+            fields: [
+                {
+                    inline: null,
+                    name: "Field 1",
+                    value: "This is field 1",
+                },
+            ],
+            */
+        });
+
+        return env.reply({ embeds: [embed] });
+    }
 };
 
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
