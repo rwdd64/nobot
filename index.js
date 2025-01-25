@@ -226,8 +226,8 @@ const func_table = {
             },
             footer: {
                 text: opt.getString("footer", false) ?
-                    opt.getString("footer") : `Made with ${client.user.username}`,
-                icon_url: client.user.displayAvatarURL(),
+                    opt.getString("footer") : null,
+                icon_url: null,
                 proxy_icon_url: null,
             },
             thumbnail: {
