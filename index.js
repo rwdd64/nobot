@@ -118,7 +118,10 @@ const commands = [
             }
         ],
     },
-
+    {
+        name: "coin",
+        description: "Flip a coin",
+    },
 ];
 
 const func_table = {
@@ -314,6 +317,16 @@ const func_table = {
         });
 
         return env.reply({ embeds: [embed] });
+    },
+    coin: async function(env, args) {
+        const outcomes = ["Heads", "Tails"];
+        const index = Math.floor(Math.random() * 2);
+
+        await env.client.application.emojis.fetch();
+        const emoji = env.client.application.emojis.cache.find(
+            e => e.name === outcomes[index].toLowerCase());
+
+        env.reply(`And the result is...${outcomes[index]}! ${emoji}`);
     },
 };
 
