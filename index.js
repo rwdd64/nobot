@@ -1,4 +1,4 @@
-import { REST, Routes, ApplicationCommandOptionType, ChatInputCommandInteraction, Message, Client, Events, GatewayIntentBits, Embed, resolveColor } from "discord.js";
+import { REST, Routes, ApplicationCommandOptionType, ChatInputCommandInteraction, Message, Client, Events, GatewayIntentBits, Embed, Emoji, resolveColor } from "discord.js";
 import { MongoClient, ServerApiVersion } from "mongodb";
 
 const DEFAULT_PREFIX = ";";
@@ -106,6 +106,19 @@ const commands = [
             },
         ],
     },
+    {
+        name: "emoji",
+        description: "Get the full image of an emoji",
+        options: [
+            {
+                name: "name",
+                description: "The emoji\'s name",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            }
+        ],
+    },
+
 ];
 
 const func_table = {
@@ -260,7 +273,42 @@ const func_table = {
         });
 
         return env.reply({ embeds: [embed] });
-    }
+    },
+    emoji: async function(env, args) {
+        let e_name;
+        if (env instanceof ChatInputCommandInteraction) {
+            e_name = env.options.getString("name");
+        } else if (env instanceof Message) {
+            e_name = args[1];
+        }
+
+        let emoji;
+
+        if (e_name.startsWith("<:")) {
+            emoji = env.guild.emojis.cache.find(e => e.identifier === e_name.slice(2, -1));
+        } else if (e_name.startsWith("<a:")) {
+            emoji = env.guild.emojis.cache.find(e => e.identifier === e_name.slice(1, -1));
+        } else {
+            emoji = env.guild.emojis.cache.find(e => e.name === e_name);
+        }
+
+        if (!emoji) {
+            return env.reply("[ERROR]: Couldn't find emoji. Maybe wrong name?");
+        }
+
+        const img_url = emoji.imageURL();
+
+        if (!img_url) {
+            return env.reply("[ERROR]: Couldn't find image url. Maybe not a custom emoji?");
+        }
+
+        const embed = new Embed({
+            title: "EMOJI VIEWER",
+            image: { url: img_url },
+        });
+
+        return env.reply({ embeds: [embed] });
+    },
 };
 
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
