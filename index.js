@@ -158,6 +158,8 @@ const func_table = {
         if (env instanceof ChatInputCommandInteraction) {
             content = env.options.getString("text");
         } else if (env instanceof Message) {
+            if (args.length < 2)
+                return env.reply("[ERROR]: Missing arguments.");
             content = args.slice(1).join(" ");
         }
         await env.reply(content);
@@ -167,6 +169,8 @@ const func_table = {
         if (env instanceof ChatInputCommandInteraction) {
             prefix = env.options.getString("new_prefix");
         } else if (env instanceof Message) {
+            if (args.length < 2)
+                return env.reply("[ERROR]: Missing arguments.");
             prefix = args.slice(1).join(" ");
         }
 
@@ -279,6 +283,8 @@ const func_table = {
         if (env instanceof ChatInputCommandInteraction) {
             e_name = env.options.getString("name");
         } else if (env instanceof Message) {
+            if (args.length < 2)
+                return env.reply("[ERROR]: Missing arguments.");
             e_name = args[1];
         }
 
@@ -293,7 +299,7 @@ const func_table = {
         }
 
         if (!emoji) {
-            return env.reply("[ERROR]: Couldn't find emoji. Maybe wrong name?");
+            return env.reply("[ERROR]: Couldn't find emoji. Maybe wrong name, or isn\'t a custom emoji?");
         }
 
         const img_url = emoji.imageURL();
